@@ -1,2 +1,5 @@
 # companion-wiki
-Edits for Companion WIki
+Proposed edits for Companion WIki
+
+
+[Setting-up-Developer-Environment.md](Setting-up-Developer-Environment.md)
