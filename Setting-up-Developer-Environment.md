@@ -33,26 +33,18 @@ If you want to use USB-devices at WSL, it gets complicated because WSL doesn't h
 - On Windows install the [USB-IP driver](https://github.com/dorssel/usbipd-win/releases)  
 - Optional but highly recommended install a GUI to control the USB connections: [WSL USB Manager](https://gitlab.com/alelec/wsl-usb-gui/-/releases)  
 - Make sure your WSL kernel is at least version 5.15.150.1 (released Mar 2024) (`uname -a`). If not, update your kernel.  
-- To install the necessary software on the Linux side,Assuming Ubuntu 20 or above run:
-
-```
-sudo apt install linux-tools-virtual hwdata
-sudo update-alternatives --install /usr/local/bin/usbip usbip /usr/lib/linux-tools/*/usbip 20
-sudo apt install usbutils
-```
 - Linux distributions need extra rules to make USB devices accessible to users:
-- [*if PR is accepted*] Copy the file 50-companion-WSL.rules to /etc/udev/rules.d/ (same as described in step 2a below.)  
-- [*otherwise*] Copy the following code into a bash shell (terminal):
+- Copy the following code into a bash shell (terminal):
 ~~~
 sudo cat <<EOF |sudo tee /etc/udev/rules.d/50-companion-WSL.rules
 SUBSYSTEM=="usb|hidraw", GROUP="plugdev", MODE:="0666"
 EOF
 
 ~~~
-- Now reboot the Computer 
-- Open the WSL USB Manager  
+- Now reboot the Computer (It may be sufficient to type: `sudo udevadm control --reload-rules`.)
+- Open the WSL USB Manager in Windows
 - Attach your USB device, you should see it popping up in the top pane of the manager.  
-- Check the "bound" checkbox next to your USB device  
+- Check the "bound" checkbox next to your USB device (usbip will now remember this permission; you won't have to do it again.) 
 - Select the USB device by clicking on it and then press the "Attach" button. The device should now move from the top pane to the forwarded devices pane.  
 - Optional: on the linux shell use `lsusb` to check if you find your device and remember the bus and device number.  
 - Optional: In the linux shell use `cat /dev/bus/usb/001/003` to check if you have access to the device. Replace the numbers (/001/003) with the bus number and the device number that you have found with lsusb  
@@ -69,15 +61,15 @@ On macos, the typically way to install git and other tools is with [Homebrew](ht
 There are many ways of doing this. We recommend using a version manager, to allow for easily updating and switching between versions.
 
 In the past, we recommended using `n`, but that requires a version node.js to be installed first.  
-Our recommendation is to use [fnm](https://github.com/Schniz/fnm#installation) It is fast and cross-platform. You are free to install any other way you wish, but you will need to figure out the correct commands or ensure you have the right version at each point.
+Our recommendation is to use [fnm](https://github.com/Schniz/fnm#installation) It is fast and cross-platform. (If a dependency is missing, use `sudo apt install` to add it.) You are free to install any other way you wish, but you will need to figure out the correct commands or ensure you have the right version at each point.
 
-Once you have installed fnm execute the following in a terminal, to install node.js v18 and make it be the default.
+Once you have installed fnm execute the following in a terminal, to install node.js v22 and make it be the default.
 
 ```
 fnm install 22
 fnm use 22
 fnm default 22
-corepack enable (question: is this equivalent to `npm install -g corepack` ?)
+corepack enable
 yarn init -2
 ```
 
@@ -99,15 +91,15 @@ TODO - we should recommend a free git gui tool  [Perhaps SmartGit?]
 
 If you are using linux, you should follow the dependencies and udev rules steps as described in the README included in the release builds https://github.com/bitfocus/companion/tree/main/assets/linux.
 
-For WSL, you should follow the dependencies portion.
+For WSL, you should follow the dependencies portion since you already installed the udev rules, above.
 
-You may also need to install python, which on Ubuntu can be achieved with: `sudo apt install python`
+You may also need to install python, which on Ubuntu can be achieved with: `sudo apt install python` (when is this needed?)
 
 ### 3) Companion preparation
 
 Using your git client, you can clone Companion.
 
-Once you have done this, in a terminal (the console window inside vscode is perfect for this) run  `yarn install` to prepare your clone for being run. You will need to do this every time you update your clone as we are often updating dependencies or changing the webui code. (Does one need to do: `yarn workspace @companion-app/shared build` ?)
+Once you have done this, in a terminal (the console window inside vscode is perfect for this) run  `yarn install` to prepare your clone for being run. You will need to do this every time you update your clone as we are often updating dependencies or changing the webui code.
 
 You can now run Companion with `yarn dev`
 
