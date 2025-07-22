@@ -8,7 +8,7 @@ The following will also work for developing modules, if you prefer the more manu
 Many AV users work on Windows, setting up a developers environment is a bit harder then on OSX or Linux. The key is combining linux on Windows. You are installing Linux side-by-side on windows.
 
 First install Windows Subsystem for Linux version 2 (WSL2),   
-WSL is included with Windows but needs to be activated. Follow (Microsoft’s installation instructions)[https://learn.microsoft.com/en-us/windows/wsl/setup/environment](https://learn.microsoft.com/en-us/windows/wsl/setup/environment). 
+WSL is included with Windows but needs to be activated. Follow [Microsoft’s installation instructions](https://learn.microsoft.com/en-us/windows/wsl/setup/environment). 
 
 Basically, open a command or powershell window and type  
 ~~~  
@@ -93,7 +93,7 @@ If you are using linux, you should follow the dependencies and udev rules steps 
 
 For WSL, you should follow the dependencies portion since you already installed the udev rules, above.
 
-You may also need to install python, which on Ubuntu can be achieved with: `sudo apt install python` (when is this needed?)
+You may also need to install python, which on Ubuntu can be achieved with: `sudo apt install python`
 
 ### 3) Companion preparation
 
