@@ -5,7 +5,7 @@ The following will also work for developing modules, if you prefer the more manu
 
 ### Installing WSL
 
-Many AV users work on Windows, setting up a developers environment is a bit harder then on OSX or Linux. The key is combining linux on Windows. You are installing Linux side-by-side on windows.
+Many AV users work on Windows. Setting up a development environment is a bit harder then on OSX or Linux. The key is to install Linux side-by-side on Windows.
 
 First install Windows Subsystem for Linux version 2 (WSL2),   
 WSL is included with Windows but needs to be activated. Follow [Microsoft’s installation instructions](https://learn.microsoft.com/en-us/windows/wsl/setup/environment). 
@@ -16,25 +16,25 @@ Basically, open a command or powershell window and type
 ~~~  
 After this completes, reboot your computer and WSL will automatically install the latest LTS version of Ubuntu. (24.04 at this time of writing).  Once this is done continue through Microsoft’s instructions, especially  
     `sudo apt update && sudo apt upgrade`, 
-also the instructions to:	
+as well as the instructions to:	
  - Set up Windows terminal,  
  - Set up VS Code, and   
  - Set up Git.
 
 If you develop with Visual Studio Code, which we currently recommend, then you can do remote developing. That means VSC is running on Windows but it opens a connection to the virtual machine and actually you edit the files directly on the WSL machine. VSC also has an integrated terminal so you can work on the WSLOS. For that you should install the extension [WSL](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl) and follow [Microsoft’s instructions here](https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-vscode). You will see the connection info on the bottom left of each window and you can connect there or by the command palette. You can debug using breakpoints etc. either by starting automatic debugging from the terminal or by attaching to the running node.js process (which should be the first one in the list when you type ctrl-shift-P and “Debug: Attach to Node Process”.
 
-You will need to install all the prerequisite tools on the WSL machine just like you would do on Linux. Look below what these tools are.
+You will need to install all the prerequisite tools on the WSL machine just like you would do on Linux, as described in the sections below.
 
 When you are running Companion from a VSC terminal, VSC will know the network ports and create automatic port forwards for you. That means although Companion runs on the virtual machine, you'll be able to access the admin page from your Windows host by accessing localhost or 127.0.0.1 and the used port.  
 That makes it quite convenient but you always have to remember that Companion runs on a virtual machine inside of your computer and that virtual machine has a different IP-address. When you want to access the API of software running on your Windows host, you can't use 127.0.0.1 like you would without WSL. 127.0.0.1 is the localhost of the WSL. WSL sets up a virtual network interface for you and to access your host OS, you have to use 172.28.96.1. If you want to verify this use the command `ip route` in your Linux shell.
 
-If you want to use USB-devices at WSL, it gets complicated because WSL doesn't have built-in USB passthrough features. The solution is USB over IP software. That means you capture the USB packets at the host, transmit it to the virtual machine and then inject it to the USB system there. Here is how it's done:
+If you want to use USB-devices in WSL, it gets complicated because WSL doesn't have built-in USB passthrough features. The solution is USB over IP software. That means you capture the USB packets at the host, transmit it to the virtual machine and then inject it to the USB system there. Here is how it's done:
 
 - On Windows install the [USB-IP driver](https://github.com/dorssel/usbipd-win/releases)  
 - Optional but highly recommended install a GUI to control the USB connections: [WSL USB Manager](https://gitlab.com/alelec/wsl-usb-gui/-/releases)  
 - Make sure your WSL kernel is at least version 5.15.150.1 (released Mar 2024) (`uname -a`). If not, update your kernel.  
 - Linux distributions need extra rules to make USB devices accessible to users:
-- Copy the following code into a bash shell (terminal):
+- Copy the following code into a bash shell (terminal) to create the rules file:
 ~~~
 sudo cat <<EOF |sudo tee /etc/udev/rules.d/50-companion-WSL.rules
 SUBSYSTEM=="usb|hidraw", GROUP="plugdev", MODE:="0666"
@@ -43,7 +43,7 @@ EOF
 ~~~
 - Now reboot the Computer (It may be sufficient to type: `sudo udevadm control --reload-rules`.)
 - Open the WSL USB Manager in Windows
-- Attach your USB device, you should see it popping up in the top pane of the manager.  
+- Attach your USB device. You should see it popping up in the top pane of the manager.  
 - Check the "bound" checkbox next to your USB device (usbip will now remember this permission; you won't have to do it again.) 
 - Select the USB device by clicking on it and then press the "Attach" button. The device should now move from the top pane to the forwarded devices pane.  
 - Optional: on the linux shell use `lsusb` to check if you find your device and remember the bus and device number.  
@@ -85,17 +85,17 @@ If you have never used git or github before, have a read of our [Git crashcourse
 
 For a simple windowing editor, you can try gedit. Install it with `sudo apt install gedit`
 
-TODO - we should recommend a free git gui tool  [Perhaps SmartGit?]
+TODO - we should recommend a free git gui tool  (_Perhaps SmartGit?_)
 
 ### 2a) Linux dependencies
 
 If you are using linux, you should follow the dependencies and udev rules steps as described in the README included in the release builds https://github.com/bitfocus/companion/tree/main/assets/linux.
 
-For WSL, you should follow the dependencies portion since you already installed the udev rules, above.
+For WSL, only follow the dependencies portion, since you already installed the udev rules, above.
 
 You may also need to install python, which on Ubuntu can be achieved with: `sudo apt install python`
 
-### 3) Companion preparation
+### 3) Companion preparation and development
 
 Using your git client, you can clone Companion.
 
@@ -103,9 +103,33 @@ Once you have done this, in a terminal (the console window inside vscode is perf
 
 You can now run Companion with `yarn dev`
 
-By default this will serve the prebuilt version of the webui, which will not update as you make changes. If you wish to run the webui in development mode in a second terminal window/tab run`yarn dev:webui`. (or `yarn dist:webui` to just compile it)This will launch the development version of the webui on a different port, typically [http://localhost:5173](http://localhost:5173)
+By default this will serve the prebuilt version of the webui, which will not update as you make changes. If you wish to run the webui in development mode in a second terminal window/tab run`yarn dev:webui` (or `yarn dist:webui` to just compile it). This will launch the development version of the webui on a different port, typically [http://localhost:5173](http://localhost:5173)
 ***Important: you still need to run `yarn dev` separately for this to work***
 
-This will run the 'headless' version of Companion, without the red launcher window. If you want to run with that, you can cd into the `launcher` folder and run `yarn dev`. On WSL this may require additional dependencies to be installed.
+- #### debugging the webui in Visual Studio Code: 
+   The webui is written in a combination of CSS/Sass (*.scss) and [React](https://react.dev/learn) (*.tsx). You can debug the React code in VS Code
+   by following [Microsoft's instructions to set up a *launch.json* file](https://code.visualstudio.com/docs/nodejs/reactjs-tutorial#_debugging-react) with the following adjustments:
+   - if using Chrome as your browser, select "Launch Chrome" from the menu or make sure the file shows: `"type": "chrome"` instead of `"type": "msedge",` and adjust `"name:"` as well 
+   - Set the port number: `"url": "http://localhost:5173/"` (you can add a specific page to the URL, if desired, for fast access to that page).
+   - Add the subfolder: `"webRoot": "${workspaceFolder}/webui/src"`
+   - The entry should in *launch.json* should be similar to this (if using Chrome)
+   ~~~
+   {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "type": "chrome",
+                "request": "launch",
+                "name": "Launch Companion Webui (in Chrome)",
+                "url": "http://localhost:5173/",
+                "webRoot": "${workspaceFolder}/webui/src"
+            }
+        ]
+    }
+    ~~~
+    - After starting `yarn dev:webui` (and `yarn dev`, as above), press **F5** to launch a web browser and start debugging. You can set breakpoints, explore the stack and current state, etc., in the usual way.
+	- Note that breakpoints will generally cause timeouts in the webui. If you need to debug timing-critical features, you may have to insert logging entries into the code instead.
+
+The instructions above will run the 'headless' version of Companion, without the red launcher window. If you want to run with that, you can cd into the `launcher` folder and run `yarn dev`. On WSL this may require additional dependencies to be installed.
 
 TODO: How to compile a distribution for Windows from WSL (note that links and packages mentioned in the Wiki “Build for Another Device” are broken)
